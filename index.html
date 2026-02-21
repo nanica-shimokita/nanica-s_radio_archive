@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NANICA'S RADIO // CYBERPUNK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --neon-pink: #ff00ff;
+            --neon-cyan: #00ffff;
+            --dark-bg: #0a0a0f;
+        }
+        body {
+            background-color: var(--dark-bg);
+            color: #e2e8f0;
+            -webkit-tap-highlight-color: transparent;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 30px 30px;
+        }
+        .cyber-panel {
+            background: rgba(15, 15, 25, 0.8);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+        }
+        .active-track {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+            background: rgba(255, 0, 255, 0.05);
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 8px var(--neon-cyan);
+        }
+        .neon-text-pink {
+            text-shadow: 0 0 8px var(--neon-pink);
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-mono pb-48">
+
+    <div class="max-w-md mx-auto px-5 py-8">
+        <header class="mb-10 flex items-center justify-between border-b border-cyan-900 pb-4">
+            <div>
+                <h1 class="text-2xl font-black italic tracking-tighter text-cyan-400 neon-text-cyan uppercase">
+                    NANICA'S RADIO
+                </h1>
+                <p class="text-[10px] text-cyan-700 tracking-[0.2em] font-bold">SYSTEM STATUS: LINKED</p>
+            </div>
+            <div class="flex flex-col items-end">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_red]"></span>
+                    <span class="text-red-500 text-[10px] font-bold tracking-widest uppercase">LIVE_FEED</span>
+                </div>
+                <span class="text-[8px] text-slate-500 mt-1 font-mono">NODE: TYO-03</span>
+            </div>
+        </header>
+
+        <h2 class="text-[10px] font-bold text-pink-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+            <span class="w-4 h-[1px] bg-pink-500"></span>
+            Program_Archive
+        </h2>
+
+        <!-- Track List -->
+        <div class="space-y-5" id="track-list">
+            <!-- Tracks injected by JS -->
+        </div>
+    </div>
+
+    <!-- Cyber Bottom Player -->
+    <div id="player-container" class="fixed bottom-0 left-0 right-0 bg-[#0f0f1a] border-t-2 border-cyan-500 p-6 pb-10 transition-transform duration-500 translate-y-full z-50 shadow-[0_-10px_30px_rgba(0,255,255,0.15)]">
+        <div class="max-w-md mx-auto relative">
+            <div class="absolute -top-6 -left-2 w-4 h-4 border-l-2 border-t-2 border-cyan-500"></div>
+            <div class="absolute -top-6 -right-2 w-4 h-4 border-r-2 border-t-2 border-pink-500"></div>
+
+            <div class="flex items-center gap-5 mb-6">
+                <!-- Personality Avatar -->
+                <div id="player-avatar" class="w-16 h-16 rounded-none bg-slate-900 overflow-hidden flex-shrink-0 border border-cyan-500 p-1 relative">
+                    <div class="absolute inset-0 bg-cyan-500 opacity-10 animate-pulse"></div>
+                    <img src="" alt="" class="w-full h-full object-cover hidden relative z-10 grayscale contrast-125">
+                    <div class="w-full h-full flex items-center justify-center text-3xl text-cyan-500 relative z-10">
+                        🎙️
+                    </div>
+                </div>
+                
+                <div class="flex-1 min-w-0">
+                    <h2 id="current-title" class="font-black text-cyan-400 truncate text-lg uppercase italic tracking-tight italic">LOADING...</h2>
+                    <div class="flex flex-col gap-1 mt-1">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] bg-cyan-950 text-cyan-400 px-1 font-bold italic">HOST</span>
+                            <span id="current-personality" class="text-xs font-bold text-white truncate uppercase tracking-wider">UNKNOWN</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[9px] bg-pink-950 text-pink-400 px-1 font-bold italic">TAG</span>
+                            <span id="current-category" class="text-[10px] text-pink-500 font-bold tracking-tighter uppercase">NULL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mini-visualizer" class="flex items-end gap-0.5 h-8 opacity-0 transition-opacity">
+                    <div class="w-1.5 bg-cyan-400 h-2 animate-[bounce_0.6s_infinite]"></div>
+                    <div class="w-1.5 bg-pink-500 h-5 animate-[bounce_0.8s_infinite]"></div>
+                    <div class="w-1.5 bg-cyan-400 h-3 animate-[bounce_0.5s_infinite]"></div>
+                </div>
+            </div>
+
+            <audio id="audio-player" class="w-full h-8 opacity-80 invert hue-rotate-180" controls>
+                Your browser does not support audio.
+            </audio>
+        </div>
+    </div>
+
+    <script>
+        const playlist = [
+            {
+                id: 1,
+                title: "思い出に残っているホール公演",
+                personality: "マッドハッター / 白うさぎ / リン",
+                category: "HISTORY",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+                avatar: "" 
+            },
+            {
+                id: 2,
+                title: "普通ってなんだろう。",
+                personality: "マーシー / 院長 / チャチャ",
+                category: "PHILOSOPHY",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+                avatar: ""
+            },
+            {
+                id: 3,
+                title: "疑心暗鬼タイム",
+                personality: "マスター / アシスタント / エンヴィ",
+                category: "SUSPENSE",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+                avatar: ""
+            },
+            {
+                id: 4,
+                title: "素晴らしい相棒",
+                personality: "怪盗N / エレン",
+                category: "PARTNER",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+                avatar: ""
+            },
+            {
+                id: 5,
+                title: "気になるあの人",
+                personality: "なつ / あき / ふゆ",
+                category: "CRUSH",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+                avatar: ""
+            },
+            {
+                id: 6,
+                title: "はじめちゃった",
+                personality: "隊長 / 副隊長 / ドクター",
+                category: "MISSION",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+                avatar: ""
+            },
+            {
+                id: 7,
+                title: "エンディング",
+                personality: "ラジオDJ",
+                category: "the party begins",
+                url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+                avatar: ""
+            }
+        ];
+
+        const audioPlayer = document.getElementById('audio-player');
+        const trackListContainer = document.getElementById('track-list');
+        const playerContainer = document.getElementById('player-container');
+        const currentTitleDisplay = document.getElementById('current-title');
+        const currentPersonalityDisplay = document.getElementById('current-personality');
+        const currentCategoryDisplay = document.getElementById('current-category');
+        const playerAvatarContainer = document.getElementById('player-avatar');
+        const miniVisualizer = document.getElementById('mini-visualizer');
+
+        let currentTrackId = null;
+
+        function renderPlaylist() {
+            trackListContainer.innerHTML = '';
+            playlist.forEach(track => {
+                const isActive = currentTrackId === track.id;
+                const trackItem = document.createElement('div');
+                trackItem.className = `cyber-panel flex items-center p-4 cursor-pointer active:scale-[0.98] transition-all duration-300 ${isActive ? 'active-track' : ''}`;
+                
+                trackItem.innerHTML = `
+                    <div class="flex items-center gap-5 w-full">
+                        <div class="relative flex-shrink-0">
+                            <div class="w-12 h-12 flex items-center justify-center border ${isActive ? 'border-pink-500 bg-pink-900/20 text-pink-400' : 'border-cyan-900 bg-slate-950 text-cyan-900'}">
+                                ${track.avatar ? `<img src="${track.avatar}" class="w-full h-full object-cover">` : (isActive ? '<span class="animate-pulse">⚡</span>' : '<span>>></span>')}
+                            </div>
+                            ${isActive ? '<div class="absolute -top-1 -left-1 w-2 h-2 bg-pink-500"></div>' : ''}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-black text-sm uppercase tracking-tighter ${isActive ? 'text-pink-400 neon-text-pink' : 'text-cyan-100'} truncate">${track.title}</h3>
+                            <div class="flex flex-col gap-0.5 mt-1">
+                                <p class="text-[10px] font-bold text-cyan-600 truncate uppercase tracking-widest">${track.personality}</p>
+                                <p class="text-[8px] text-slate-500 font-mono tracking-tighter uppercase font-bold">[${track.category}]</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                trackItem.addEventListener('click', () => playTrack(track));
+                trackListContainer.appendChild(trackItem);
+            });
+        }
+
+        function playTrack(track) {
+            if (currentTrackId === track.id) {
+                if (audioPlayer.paused) audioPlayer.play();
+                else audioPlayer.pause();
+                return;
+            }
+            currentTrackId = track.id;
+            audioPlayer.src = track.url;
+            
+            currentTitleDisplay.textContent = track.title;
+            currentPersonalityDisplay.textContent = track.personality;
+            currentCategoryDisplay.textContent = track.category;
+            
+            const img = playerAvatarContainer.querySelector('img');
+            const placeholder = playerAvatarContainer.querySelector('div');
+            if (track.avatar) {
+                img.src = track.avatar;
+                img.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                img.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+
+            playerContainer.classList.remove('translate-y-full');
+            renderPlaylist();
+            audioPlayer.play();
+        }
+
+        renderPlaylist();
+        
+        audioPlayer.onplay = () => { 
+            miniVisualizer.classList.remove('opacity-0');
+        };
+        audioPlayer.onpause = () => { 
+            miniVisualizer.classList.add('opacity-0');
+        };
+    </script>
+</body>
+</html>
